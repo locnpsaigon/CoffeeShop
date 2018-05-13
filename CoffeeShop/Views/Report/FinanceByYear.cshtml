@@ -1,0 +1,177 @@
+﻿@model List<int>
+@{
+    ViewBag.Title = "Báo cáo tài chính theo năm";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+<div id="page-wrapper" class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <h4 class="page-header form-title">@ViewBag.Title</h4>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-12 col-sm-12">
+            <div style="display:table;">
+                <div style="display:table-row">
+                    <div style="display:table-cell;">Năm:</div>
+                    <div style="display:table-cell; padding-left:8px;">
+                        <select id="select-year" class="form-control selectpicker show-tick" style="width:100px;">
+                            @foreach (int year in Model)
+                            {
+                                <option>@year</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-12 col-sm-12">
+            <div id="chartContainer" style="width:100%; height:360px;"></div>
+        </div>
+        <div class="col-xs-12 col-sm-12">
+            <br />
+            <div id="reportContainer" style="width:100%;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jquerynum")
+    @Scripts.Render("~/bundles/canvasjs")
+
+    <script>
+
+        // Add commas formart to number
+        var addCommas = function (nStr) {
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+        }
+
+        // Function to create and show finance chart
+        var renderChart = function (data) {
+            var dps1 = []; // receipt points
+            var dps2 = []; // payment points
+            
+            $.each(data, function (index, value) {
+                dps1.push({x:index, y:value.RAmount, label: "Tháng " + value.Month});
+                dps2.push({ x: index, y: value.PAmount, label: "Tháng " + value.Month });
+            });
+
+            var chart = new CanvasJS.Chart("chartContainer", {
+                theme: "theme1",
+                title: {
+                    text: "Biểu đồ thu chi theo tháng",
+                    fontSize: 18
+                },
+                legend: {
+                    fontSize: 14
+                },
+                data: [
+                    {
+                        color: "#449D44",
+                        type: "column",
+                        showInLegend: true,
+                        legendMarkerType: "circle",
+                        legendText: "Tiền thu",
+                        dataPoints: dps1
+                    },
+                    {
+                        color: "#D9534F",
+                        type: "column",
+                        showInLegend: true,
+                        legendMarkerType: "circle",
+                        legendText: "Tiền chi",
+                        dataPoints: dps2
+                    }
+                ]
+            });
+
+
+            chart.render();
+
+            $('#chartContainer').hide();
+            $('#chartContainer').fadeIn();
+        }
+
+        var renderReport = function (data) {
+            var html = '<table class="table table-hover table-bordered">';
+            html += '<tr class="alert-success">';
+            html += '<th class="text-center">Tháng</th><th>Thu</th><th>Chi</th><th class="text-nowrap">Chênh lệch</th>';
+            html += '</tr>';
+
+            var rAmountTotal = 0;
+            var pAmountTotal = 0;
+
+            $.each(data, function (index, value) {
+                rAmountTotal += value.RAmount;
+                pAmountTotal += value.PAmount;
+                var date = new Date(value.Date);
+                html += '<tr>';
+                html += '<td class="text-center text-nowrap">' + value.Month + '</td>';
+                html += '<td class="text-right text-success text-nowrap">' + addCommas(value.RAmount) + '</td>';
+                html += '<td class="text-right text-danger text-nowrap">' + addCommas(value.PAmount) + '</td>';
+                html += '<td class="text-right text-primary text-nowrap">' + addCommas((value.RAmount - value.PAmount)) + '</td>';
+                html += '</tr>';
+            });
+
+            html += '<tr>';
+            html += '<td class="text-center text-nowrap"><strong>Tổng cộng</strong></td>';
+            html += '<td class="text-right text-success text-nowrap"><strong>' + addCommas(rAmountTotal) + '</strong></td>';
+            html += '<td class="text-right text-danger text-nowrap"><strong>' + addCommas(pAmountTotal) + '</strong></td>';
+            html += '<td class="text-right text-primary text-nowrap"><strong>' + addCommas((rAmountTotal - pAmountTotal)) + '</td>';
+            html += '</tr>';
+
+            html += '</table>';
+
+            $('#reportContainer').html(html);
+        }
+
+        // Function to update chart data
+        var updateChart = function(year, callback) {
+            var postParams = new Object;
+            postParams.Year = year;
+            $.ajax({
+                url: '/api/report/FinanceReportByYear',
+                type: 'POST',
+                async: false,
+                dataType: 'json',
+                data: JSON.stringify(postParams),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    callback(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+        };
+
+        $("#select-year").on("change", null, function() {
+            updateChart($(this).val(), function(data) {
+                renderChart(data);
+                renderReport(data);
+            });
+        });
+
+        $(document).ready(new function () {
+            updateChart($('#select-year').val(), function(data) {
+                renderChart(data);
+                renderReport(data);
+            });
+
+            $("#menu-finance").attr("class", "active");
+        });
+
+    </script>
+}

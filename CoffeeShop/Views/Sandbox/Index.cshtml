@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<a id="link" href="#"></a>
+
+<br />
+<br />
+
+<input id="btn-click-me" type="button" class="form-control" style="width:120px;" value="Click Me!">
+<br />
+<br />
+
+@section Scripts {
+
+    <script>
+
+        $.fn.exFunction = function (abc) {
+            //alert('Extended jquery function just called!!!');
+            alert(abc);
+                };
+        //(function aa (arg1) {
+        //    arg1.fn.exFunction = function () {
+        //        alert('Extended jquery function just called!!!');
+        //    };
+
+        //})(jQuery);
+
+        //// extend jquery function
+        //(function ($) {
+        //    $.fn.exFunction = function () {
+        //        alert('Extended jquery function just called!!!');
+        //    };
+
+        //    alert('ex func attacted!!!');
+        //})(jQuery);
+
+        $('#btn-click-me').on("click", function () {
+             $("#link").exFunction("abc");; // jquery object :)
+
+        });
+
+    </script>
+
+}

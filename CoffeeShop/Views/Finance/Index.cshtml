@@ -1,0 +1,149 @@
+﻿@using CoffeeShop.DAL;
+@model CoffeeShop.Models.FinanceReportViewModel
+
+@{
+    ViewBag.Title = "Sổ thu chi";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+
+    decimal PAmountTotal = 0;
+    decimal RAmountTotal = 0;
+    decimal DiffTotal = 0;
+    decimal DiffAvg = 0;
+    decimal RAmountAvg = 0;
+    decimal PAmountAvg = 0;
+}
+<div id="page-wrapper" class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <h4 class="page-header form-title">@ViewBag.Title</h4>
+        </div>
+    </div>
+    @using (Html.BeginForm())
+    {
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 form-group">
+                <div style="display:table;">
+                    <div style="display:table-row;">
+                        <div style="display:table-cell; white-space:nowrap;">Từ:</div>
+                        <div style="display:table-cell; padding-left: 2px;">
+                            @Html.TextBoxFor(m => m.FromDate, new { @id = "date-from", @style = "width:100px;", @class = "form-control text-center", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(m => m.FromDate, null, new { @class = "help-inline" })
+                        </div>
+                        <div style="display:table-cell; padding-left: 16px; white-space:nowrap;">đến:</div>
+                        <div style="display:table-cell; padding-left: 2px;">
+                            @Html.TextBoxFor(m => m.ToDate, new { @id = "date-to", @style = "width:100px;", @class = "form-control text-center", @readonly = "readonly" })
+                            @Html.ValidationMessageFor(m => m.ToDate, null, new { @class = "help-inline" })
+                        </div>
+                        <div style="display:table-cell; padding-left: 8px;">
+                            @Html.ActionLink(" Nhập liệu ", "Add", null, new { @class = "btn btn-success btn-sm", @role = "button" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-lg-8">
+            <table class="table table-hover table-bordered">
+                <tr class="alert-success">
+                    <th class="text-center text-nowrap">
+                        Ngày
+                    </th>
+                    <th class="text-nowrap">
+                        Thu
+                    </th>
+                    <th class="text-nowrap">
+                        Chi
+                    </th>
+                    <th class="text-nowrap">
+                        Chênh lệch
+                    </th>
+                    <th></th>
+                </tr>
+                @foreach (var item in Model.ReportData)
+                {
+                    PAmountTotal += item.PAmount;
+                    RAmountTotal += item.RAmount;
+                    <tr>
+                        <td class="text-center text-nowrap">
+                            @item.Date.ToString("dd-MM-yyyy")
+                        </td>
+                        <td class="text-right text-success text-nowrap">
+                            @item.RAmount.ToString("#,###")
+                        </td>
+                        <td class="text-right text-danger text-nowrap">
+                            @item.PAmount.ToString("#,###")
+                        </td>
+                        <td class="text-right text-primary text-nowrap">
+                            @{
+                    var diff = item.RAmount - item.PAmount;
+                            }
+                            @diff.ToString("#,###")
+                        </td>
+                        <td class="text-center text-nowrap">
+                            @Html.ActionLink("Sửa",
+                                String.Format("Edit/{0}/{1}/{2}", item.Date.Year, item.Date.Month, item.Date.Day),
+                                null,
+                                new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink("Xóa",
+                                String.Format("Delete/{0}/{1}/{2}", item.Date.Year, item.Date.Month, item.Date.Day),
+                                null,
+                                new
+                                {
+                                    @class = "btn btn-danger btn-sm",
+                                    @onclick = "return confirm('Bạn muốn xóa thu chi ngày " + item.Date.ToString("dd/MM/yyyy") + " không?');"
+                                })
+                        </td>
+                    </tr>
+                }
+                @{ 
+                    DiffTotal = RAmountTotal - PAmountTotal;
+                    
+                    DiffAvg =  Model.ReportData.Count == 0 ? 0 : (DiffTotal / Model.ReportData.Count);
+                    RAmountAvg = Model.ReportData.Count == 0 ? 0 : (RAmountTotal / Model.ReportData.Count);
+                    PAmountAvg = Model.ReportData.Count == 0 ? 0 : (PAmountTotal / Model.ReportData.Count);
+                }
+                <tr class="warning">
+                    <td class="text-center"><strong>Tổng cộng</strong></td>
+                    <td class="text-right text-success"><strong>@RAmountTotal.ToString("#,###")</strong></td>
+                    <td class="text-right text-danger"><strong>@PAmountTotal.ToString("#,###")</strong></td>
+                    <td class="text-right text-primary"><strong>@DiffTotal.ToString("#,###")</strong></td>
+                    <td></td>
+                </tr>
+                <tr class="warning">
+                    <td class="text-center">Trung bình</td>
+                    <td class="text-right">@RAmountAvg.ToString("#,###.##")</td>
+                    <td class="text-right">@PAmountAvg.ToString("#,###.##")</td>
+                    <td class="text-right">@DiffAvg.ToString("#,###.##")</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jquerynum")
+    <script>
+
+        $(function () {
+            $('#date-from').datepicker({ format: "dd/mm/yyyy", todayHighlight: true });
+            $('#date-from').on('changeDate', function (ev) {
+                $(this).datepicker('hide');
+                $('form').submit();
+            });
+
+            $('#date-to').datepicker({ format: "dd/mm/yyyy", todayHighlight: true });
+            $('#date-to').on('changeDate', function (ev) {
+                $(this).datepicker('hide');
+                $('form').submit();
+            });
+        });
+
+        $(document).ready(new function () {
+            $("#menu-finance").attr("class", "active");
+        });
+
+    </script>
+}

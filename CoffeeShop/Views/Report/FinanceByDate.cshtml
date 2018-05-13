@@ -1,0 +1,198 @@
+﻿@{
+    ViewBag.Title = "Báo cáo tài chính theo ngày";
+    Layout = "~/Views/Shared/_Admin.cshtml";
+}
+
+<div id="page-wrapper" class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <h4 class="page-header form-title">@ViewBag.Title</h4>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-12 col-sm-12">
+            <div style="display:table;">
+                <div style="display:table-row">
+                    <div style="display:table-cell; white-space:nowrap;">Từ:</div>
+                    <div style="display:table-cell; padding-left:2px;"><input id="date-from" class="form-control text-center" style="width:100px;" readonly></div>
+                    <div style="display:table-cell; padding-left:16px; white-space:nowrap;">đến:</div>
+                    <div style="display:table-cell; padding-left:2px;"><input id="date-to" class="form-control text-center" style="width:100px;" readonly></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-xs-12 col-sm-12">
+            <div id="chartContainer" style="width:100%; height:350px;"></div>
+        </div>
+        <div class="col-xs-12 col-sm-12">
+            <br />
+            <div id="reportContainer" style="width:100%;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jquerynum")
+    @Scripts.Render("~/bundles/canvasjs")
+
+    <script>
+
+        // Add commas formart to number
+        var addCommas = function (nStr) {
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+        }
+
+
+        // Function to create and show finance chart
+        var renderChart = function (data) {
+            var dps1 = [];  // receipt chart points
+            var dps2 = [];  // payment chart points
+
+            $.each(data, function (index, value) {
+                var date = new Date(value.Date);
+                dps1.push({ y: value.RAmount, label: date.getDate() + "/" + (date.getMonth() + 1) });
+                dps2.push({ y: value.PAmount, label: date.getDate() + "/" + (date.getMonth() + 1) });
+            });
+
+            var chart = new CanvasJS.Chart("chartContainer", {
+                theme: "theme1",
+                title: {
+                    text: "Biểu đồ thu chi theo ngày",
+                    fontSize: 18
+                },
+                legend: {
+                    fontSize: 14
+                },
+                data: [
+                    {
+                        type: "spline",
+                        color: "#449D44",
+                        showInLegend: true,
+                        legendText: "Tiền thu",
+                        legendMarkerType: null,
+                        dataPoints: dps1
+                    },
+                    {
+                        type: "spline",
+                        color: "#D9534F",
+                        showInLegend: true,
+                        legendText: "Tiền chi",
+                        legendMarkerType: null,
+                        dataPoints: dps2
+                    },
+                ]
+            });
+
+            chart.render();
+
+            $('#chartContainer').hide();
+            $('#chartContainer').fadeIn();
+        }
+
+        var renderReport = function (data) {
+            var html = '<table class="table table-hover table-bordered">';
+            html += '<tr class="alert-success">';
+            html += '<th class="text-center">Ngày</th><th>Thu</th><th>Chi</th><th class="text-nowrap">Chênh lệch</th>';
+            html += '</tr>';
+
+            var rAmountTotal = 0;
+            var pAmountTotal = 0;
+
+            $.each(data, function (index, value) {
+                rAmountTotal += value.RAmount;
+                pAmountTotal += value.PAmount;
+                var date = new Date(value.Date);
+                html += '<tr>';
+                html += '<td class="text-center text-nowrap">' + date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getYear() + 1900) + '</td>';
+                html += '<td class="text-right text-success text-nowrap">' + addCommas(value.RAmount) + '</td>';
+                html += '<td class="text-right text-danger text-nowrap">' + addCommas(value.PAmount) + '</td>';
+                html += '<td class="text-right text-primary text-nowrap">' + addCommas((value.RAmount - value.PAmount)) + '</td>';
+                html += '</tr>';
+            });
+
+            html += '<tr>';
+            html += '<td class="text-center text-nowrap"><strong>Tổng cộng</strong></td>';
+            html += '<td class="text-right text-success text-nowrap"><strong>' + addCommas(rAmountTotal) + '</strong></td>';
+            html += '<td class="text-right text-danger text-nowrap"><strong>' + addCommas(pAmountTotal) + '</strong></td>';
+            html += '<td class="text-right text-primary text-nowrap"><strong>' + addCommas((rAmountTotal - pAmountTotal)) + '</td>';
+            html += '</tr>';
+
+            html += '</table>';
+
+            $('#reportContainer').html(html);
+        };
+
+        // Function to update chart data
+        var updateChart = function (dateFrom, dateTo, callback) {
+            var postParams = new Object();
+            postParams.dateFrom = dateFrom;
+            postParams.dateTo = dateTo;
+            $.ajax({
+                url: '/api/report/FinanceReportByDate',
+                type: 'POST',
+                async: false,
+                dataType: 'json',
+                data: JSON.stringify(postParams),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    callback(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+        };
+
+        $(document).ready(new function () {
+            // setup date picker
+            var date = new Date();
+            $('#date-to').datepicker({ format: "dd/mm/yyyy", todayHighlight: true });
+            $('#date-to').datepicker('setDate', date); // last 7 days
+            $('#date-to').datepicker('update');
+            $('#date-to').on('changeDate', function (ev) {
+                $(this).datepicker('hide');
+                updateChart(
+                    $('#date-from').val(),
+                    $('#date-to').val(), function (data) {
+                        renderChart(data);
+                        renderReport(data);
+                    });
+            });
+
+            date.setDate(date.getDate() - 7);
+            $('#date-from').datepicker({ format: "dd/mm/yyyy", todayHighlight: true });
+            $('#date-from').datepicker('setDate', date);
+            $('#date-from').datepicker('update');
+            $('#date-from').on('changeDate', function (ev) {
+                $(this).datepicker('hide');
+                updateChart(
+                    $('#date-from').val(),
+                    $('#date-to').val(), function (data) {
+                        renderChart(data);
+                        renderReport(data);
+                    });
+            });
+
+            updateChart(
+                $('#date-from').val(),
+                $('#date-to').val(), function (data) {
+                    renderChart(data);
+                    renderReport(data);
+                });
+        });
+
+        $(document).ready(new function () {
+            $("#menu-finance").attr("class", "active");
+        });
+    </script>
+}

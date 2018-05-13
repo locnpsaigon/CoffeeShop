@@ -1,0 +1,74 @@
+﻿@model CoffeeShop.Models.UserLoginViewModel
+@{
+    ViewBag.Title = "Đăng nhập hệ thống";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/admin")
+    @Styles.Render("~/Content/bootstrap")
+    @Scripts.Render("~/bundles/modernizr")
+    <style>
+        body {
+            background: url(/Content/images/bg.jpg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row text-center">
+            <img src="~/Content/Images/milano.png" style="margin-top:48px;" />
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Đăng nhập hệ thống</h3>
+                    </div>
+                    <div class="panel-body">
+                        @using (Html.BeginForm())
+                        {
+                            <fieldset>
+                                @Html.ValidationSummary(true)
+                                <div class="form-group">
+                                    @Html.TextBoxFor(m => m.Username, new { @class = "form-control", @placeholder = "Tên đăng nhập", @type = "text", @autofocus = "" })
+                                    @Html.ValidationMessageFor(m => m.Username, null, new { @class = "help-inline" })
+                                </div>
+                                <div class="form-group">
+                                    @Html.TextBoxFor(m => m.Password, new { @class = "form-control", @placeholder = "Mật khẩu", @type = "password" })
+                                    @Html.ValidationMessageFor(m => m.Password, null, new { @class = "help-inline" })
+                                </div>
+                                <div class="form-group">
+                                    @Html.CheckBoxFor(m => m.RememberMe, new { @value = "true" })
+                                    Ghi nhớ tài khoản?
+                                </div>
+                                <!-- Change this to a button or input when using this as a form -->
+                                <input type="submit" value="Đăng nhập" class="btn btn-success btn-block" />
+                            </fieldset>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="text-center">
+                <p>(C) 2015, Cà phê rang xay</p>
+                <p>Địa chỉ: 2/1F Cao Thắng, Phường 5, Quận 3, TP.HCM</p>
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/admin")
+</body>
+</html>
+
+

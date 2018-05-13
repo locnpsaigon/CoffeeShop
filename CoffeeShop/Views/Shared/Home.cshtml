@@ -1,0 +1,81 @@
+﻿<!--
+Author: W3layouts
+Author URL: http://w3layouts.com
+License: Creative Commons Attribution 3.0 Unported
+License URL: http://creativecommons.org/licenses/by/3.0/
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" href="~/favicon.png" />
+    @Styles.Render("~/content/bootstrap")
+    @Styles.Render("~/content/site")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <!----start-header----->
+    <div class="wrap">
+        <div class="header">
+            <div class="header_top">
+                <div class="logo">
+                    <a href="/Home/"><img src="~/Content/Images/milano.png" alt=""></a>
+                </div>
+                <div class="menu">
+                    <nav class="clearfix">
+                        <ul class="clearfix">
+                            <li><a href="/Home/">HOME</a></li>
+                            <li><a href="/Home/About">ABOUT</a></li>
+                            <li><a href="/Home/Service">SERVICES</a></li>
+                            <li><a href="/Home/Price">PRICE LIST</a></li>
+                            <li><a href="/Home/Contact">CONTACT</a></li>
+                        </ul>
+                        <a href="#" id="pull">Menu</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!----End-header----->
+    <!------ Slider ------------>
+    <div class="slider">
+        <div class="slider-wrapper theme-default">
+            <div id="slider" class="nivoSlider">
+                <img src="~/Content/images/slider2.jpg" data-thumb="/Content/images/slider2.jpg" alt="" />
+                <img src="~/Content/images/slider3.jpg" data-thumb="/Content/images/slider3.jpg" alt="" />
+                <img src="~/Content/images/slider4.jpg" data-thumb="/Content/images/slider4.jpg" alt="" />
+                <img src="~/Content/images/slider1.jpg" data-thumb="/Content/images/slider1.jpg" alt="" />
+            </div>
+        </div>
+    </div>
+    <!------End Slider ------------>
+    
+    <!---start-content---->
+    @RenderBody()
+    <!---End-content---->
+
+    <!---start-footer---->
+    <div class="copy-right">
+        <p>(C) 2015 Milano Coffee</p>
+        <p>ĐC: 11 Nguyễn Sơn Hà, Phường 5, Quận 3, TP.HCM</p>
+        <p>ĐT: 0914380238</p>
+        <p style="margin-top:16px;"><a href="/Finance/">Administration</a></p>
+    </div>
+    <!---End-footer---->
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+    @RenderSection("scripts", required: false)
+
+    <script type="text/javascript">
+    $(window).load(function () {
+        $('#slider').nivoSlider();
+    });
+    </script>
+
+</body>
+</html>
+

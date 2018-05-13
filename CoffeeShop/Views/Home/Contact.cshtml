@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "Liên hệ - Milano Sơn Hà";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="wrap">
+    <div class="content">
+        <div class="contact_desc">
+            @*<div class="contact-form">
+                    <h2>Liên hệ chúng tôi</h2>
+                    <form method="post" action="contact-post.html" class="left_form">
+                        <div>
+                            <span><label>Họ tên</label></span>
+                            <span><input name="userName" type="text" class="textbox"></span>
+                        </div>
+                        <div>
+                            <span><label>Email</label></span>
+                            <span><input name="userEmail" type="text" class="textbox"></span>
+                        </div>
+                        <div>
+                            <span><label>Fax</label></span>
+                            <span><input name="userPhone" type="text" class="textbox"></span>
+                        </div>
+                    </form>
+                    <form class="right_form">
+                        <div>
+                            <span><label>Tiêu đề</label></span>
+                            <span><textarea name="userMsg"> </textarea></span>
+                        </div>
+                        <div>
+                            <span><input type="submit" value="Submit" class="myButton"></span>
+                        </div>
+                    </form>
+                    <div class="clear"></div>
+                </div>*@
+            <div class="content_bottom">
+                <div class="company_address">
+                    <h2>Địa chỉ</h2>
+                    <p>11 Nguyễn Sơn Hà, P.5, Q.3, TP.HCM</p>
+                    <p>Việt Nam</p>
+                    <p>Phone: 0914380238</p>
+                    <p>Follow on: <span><a href="#">Facebook</a></span>, <span><a href="#">Twitter</a></span></p>
+                </div>
+                <div class="contact_info">
+                    <h2>Bản đồ</h2>
+                    <div id="map" style="width:750px; height:350px;"></div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&language=vi&key=AIzaSyAZS4cPV7d_3y0tDkhtHiwiRYvlzqmobkU"></script>
+    <script type="text/javascript">
+
+        var map;
+
+        $(document).ready(function () {
+            initialize();
+        });
+
+        function initialize() {
+            var myLatlng = new google.maps.LatLng(10.769173, 106.683888);
+            var myOptions = {
+                zoom: 18,
+                center: myLatlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            }
+            map = new google.maps.Map(document.getElementById("map"), myOptions);
+            // Biến text chứa nội dung sẽ được hiển thị
+            var text;
+            text = "<b style='color:#632f24;' " +
+                   "style='text-align:center'><span style='font-size:2em;font-weight:bold;'>Cà phê Milano</span><br /><br />" +
+                   "<img src='../Content/Images/logo-milano.jpg' /></b>";
+            var infowindow = new google.maps.InfoWindow(
+             {
+                 content: text,
+                 size: new google.maps.Size(160, 80),
+                 position: myLatlng
+             });
+            infowindow.open(map);
+            var marker = new google.maps.Marker({
+                position: myLatlng,
+                map: map,
+                title: "Milano Cafe"
+            });
+        }
+    </script>
+
+}
